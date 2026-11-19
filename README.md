@@ -10,7 +10,7 @@
 в Linux: `sudo apt install python3-tk`). Внешние библиотеки **не нужны**.
 
 ```bash
-cd parcelflow
+
 python main.py
 ```
 
