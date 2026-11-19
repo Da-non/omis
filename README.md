@@ -38,9 +38,6 @@ parcelflow/
   services.py              # ParcelService, TrackingService, UserService, NotificationService
   repositories.py          # ParcelRepository, UserRepository (+ Database, SQLite)
   entities.py              # <<data>> BaseEntity, Parcel, TrackingRecord, Notification, User + роли
-  mobile.py                # Направление 1: мобильное приложение
-  maps.py                  # Направление 2: картографические сервисы
-  analytics.py             # Направление 3: интеллектуальная аналитика
   seed.py                  # демонстрационные данные
 ```
 
@@ -115,32 +112,6 @@ Services → Repositories → Entities`. Все подсистемы взаим�
   - `Client.viewMyParcels()`, `Courier.markAsDelivered()`, `Administrator.manageUsers()`, `Operator.manageUsers()`.
 - `ParcelStatus` — Зарегистрирована, Принята на склад, Отправлена, В пути, Доставлена в пункт назначения, Вручена получателю, а также Задержана и Не вручена (из макетов и BPMN).
 
-### Направление 1 — Мобильное приложение (`mobile.py`)
-`MobileApplicationInjector.createMobileApplication()` создаёт `MobileUI` и `MobileController`.
-- `MobileUI` `<<UI>>`: `showParcelStatus(number)`, `showDeliveryTasks()`, `submitStatusChange(number, status)`, `showMessage(message)` — окно формата смартфона (вкладка задач — только у курьера).
-- `MobileController`: `trackParcel(number)`, `getDeliveryTasks(courierId)`, `changeParcelStatus(number, status)`; использует существующие `ParcelService` и `TrackingService`.
-
-### Направление 2 — Карты (`maps.py`)
-- `MapProvider` `<<interface>>`: `getLocation`, `calculateRoute`, `getMapData`.
-- `ExternalMapAdapter` — реализует `MapProvider` (паттерн «Адаптер»; внешний API имитируется офлайн-справочником городов Беларуси и формулой гаверсинусов).
-- `MapService`: `findParcel`, `buildRoute`, `getMapData` (работает только с `MapProvider`).
-- `MapController`: `buildDeliveryRoute(parcelNumber)`, `findCourierLocation(courierId)`.
-- `MapData` `<<data>>`: `coordinates, route, distance, estimatedDuration`.
-- `MapUI` `<<UI>>`: `requestRoute`, `showCourierLocation`, `showMap`, `showMessage` — рисует маршрут и текущее положение посылки/курьера.
-- `MapApplicationInjector.createMapApplication()`.
-
-### Направление 3 — Аналитика (`analytics.py`)
-- `DeliveryTimePredictor` `<<interface>>`: `predict(parcelData, history)`; реализация `StatisticalPredictor`.
-- `DelayDetector.findDelays(parcelData, history)` — признаки задержки (статус, просрочка, нет обновлений > 24 ч).
-- `AnalyticsService`: `predictDeliveryTime`, `detectDelays`, `getAnalyticsResults`.
-- `AnalyticsController`: `forecastDelivery(parcelNumber)`, `analyzeDelays()`.
-- `AnalyticsData` `<<data>>`: `forecastDate, delayDetected, delayDescription, confidence`.
-- `AnalyticsUI` `<<UI>>`: `requestDeliveryForecast`, `requestDelayAnalysis`, `showForecast`, `showDelayReport`, `showMessage`.
-- `AnalyticsApplicationInjector.createAnalyticsApplication()`.
-
-Расширения доступны в боковом меню в разделе «Дополнительно» и кнопками на экране отслеживания («Карта», «Аналитика»).
-
----
 
 ## Пользовательский интерфейс и переходы между окнами
 
@@ -166,6 +137,7 @@ Services → Repositories → Entities`. Все подсистемы взаим�
 - В `MapData` добавлено необязательное поле `currentPosition` для отображения текущего положения на карте; `MapController` дополнительно использует `UserService` для списка курьеров.
 - Внешний картографический API имитируется адаптером, поэтому приложение работает без интернета.
 - Даты в форме новой посылки вводятся текстом в формате `ГГГГ-ММ-ДД` (или `ДД.ММ.ГГГГ`).
+- 
 # ParcelFlow — тесты и покрытие
 
 Тесты запускаются через **pytest**. Покрытие кода считается автоматически (`pytest-cov`),
